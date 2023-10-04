@@ -1,0 +1,40 @@
+
+
+	CUSTOMER
+	
+cust_id	PRIMARY KEY
+name
+phone
+email
+password
+balance
+
+	TRANSACTIONS
+	
+trans_id	PRIMARY KEY
+from_id
+to_id
+amount
+
+	BANK
+	
+bank_id		PRIMARY KEY
+cust_id		PRIMARY KEY | FOREIGN KEY
+bank_name
+type_acc
+max_trans
+
+	LOAN
+	
+loan_id		PRIMARY KEY
+bank_id		FOREIGN KEY referencing BANK
+cust_id		FOREIGN KEY referencing BANK
+amount
+emi
+deadline
+
+	DEFALUTER
+	
+cust_id		PRIMARY KEY | FOREIGN KEY referencing BANK
+due
+penalty
