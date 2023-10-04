@@ -1,0 +1,7 @@
+1. ER Diagram 
+2. Python code to create database
+3. Python code to create tables
+4. Python code to generate tables
+5. Queries
+6. Athentication
+7. UI
