@@ -1,28 +1,29 @@
-
 	CUSTOMER
 	
-cust_id	PRIMARY KEY
+cust_id	PRIMARY KEY		// 
 name
 phone
 email
 mpin
+acc_no				// bank_id + branch_id + cust_id
 balance
+bank_id FOREIGN KEY
 
 	TRANSACTIONS
 	
 trans_id	PRIMARY KEY
-from_id
-to_id
+sender_id
+reciever_id
 date
 time
 amount
 
 	BANK
 	
-branch_id		PRIMARY KEY
-branch_name
-bank_id		
-bank_name
+branch_id		PRIMARY KEY		// City_Abbrevation
+branch			// City
+bank_id			// Abbrevation
+bank_name		// Full Form
 
 	LOAN
 	
