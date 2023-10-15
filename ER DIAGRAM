@@ -1,12 +1,11 @@
 
-
 	CUSTOMER
 	
 cust_id	PRIMARY KEY
 name
 phone
 email
-password
+mpin
 balance
 
 	TRANSACTIONS
@@ -14,27 +13,28 @@ balance
 trans_id	PRIMARY KEY
 from_id
 to_id
+date
+time
 amount
 
 	BANK
 	
-bank_id		PRIMARY KEY
-cust_id		PRIMARY KEY | FOREIGN KEY
+branch_id		PRIMARY KEY
+branch_name
+bank_id		
 bank_name
-type_acc
-max_trans
 
 	LOAN
 	
 loan_id		PRIMARY KEY
 bank_id		FOREIGN KEY referencing BANK
-cust_id		FOREIGN KEY referencing BANK
+cust_id		FOREIGN KEY referencing CUSTOMER
 amount
 emi
 deadline
 
 	DEFALUTER
 	
-cust_id		PRIMARY KEY | FOREIGN KEY referencing BANK
+cust_id		PRIMARY KEY | FOREIGN KEY referencing CUSTOMER
 due
 penalty
