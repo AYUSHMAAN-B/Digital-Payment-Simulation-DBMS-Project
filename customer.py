@@ -32,8 +32,26 @@ class Defaulters:
         self.Penality   =     Penality
         self.Due        =     Due
 ###########################################################################################################
-def cust_id_generator(bank_id,branch_id,cust_id):
+def account_number(bank_id,branch_id,cust_id):
     return bank_id+branch_id+cust_id
+
+def phone_num_validate(num):
+    if(len(num)==10):
+        return True
+    return False
+
+def mpin_validate(num):
+    if(len(num)==6):
+        return True
+    return False
+
+def email_validate(email):
+    if(len(email)<10):
+        return False
+    email_val = email[-10:]
+    if(email_val=="@gmail.com"):
+        return True
+    return False
 
 conn= psycopg2.connect(
     host="localhost",
@@ -69,9 +87,17 @@ choice =input("Please Enter your choice: ")
 if choice == "1":
     print("\n\n             Please Fill the following Details:\n")
     Name=input("Enter Your Name: ")
-    Phone = Decimal(input("Enter Your Phone Number: "))
+
+    Phone = input("Enter Your Phone Number: ")
+    while(phone_num_validate(Phone)==False):
+        Phone = input("Invalid phone number. Please Enter Again: ")
     Email = input("Enter Your Email id: ")
+    while(email_validate(Email)==False):
+        Email = input("Invalid Email entered. Email should end with '@gmail.com'.\nPlease Enter Again: ")
     M_pin = input("Enter a 6-digit UPI pin: ")
+    while(mpin_validate(M_pin)==False):
+        M_pin = input("UPI Pin should be 6 digits.Please Enter Again: ")
+
 
 ###########################################################################################################
 
@@ -127,7 +153,7 @@ if choice == "1":
 ###########################################################################################################
 
     Cust_id  =  "2"
-    Account_num=cust_id_generator(Bank_id,Branch_id,Cust_id)
+    Account_num=account_number(Bank_id,Branch_id,Cust_id)
     Customer_1 = Customer(Cust_id,Name,Phone,Email,M_pin,0,Bank_id,Branch_id,Account_num)
     # sql = "INSERT INTO customer values ('Cust_id','Name','Phone','Email','M_pin','Account_num',0,'Bank_id','Branch_id');"
     sql = "INSERT INTO customer (cust_id, name, phone, email, mpin, acc_no, balance, bank_id, branch_id) " \
