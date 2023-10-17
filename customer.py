@@ -1,6 +1,5 @@
-import csv
 import psycopg2
-from decimal import Decimal
+import datetime
 class Customer:
     def __init__(self, Cust_id,Name,Phone,Email,M_pin,Balance,Bank_id,Branch_id,Account_num):
         self.Cust_id   =  Cust_id
@@ -60,6 +59,15 @@ def cust_id_generator(cust_id):
     formatted_string = f'{int_id:05}'
     return formatted_string
 
+def transaction_id_generator(sender,reciever):
+    current_datetime = datetime.datetime.now()
+    current_year = current_datetime.year
+    current_month = current_datetime.month
+    current_day = current_datetime.day
+    current_hour = current_datetime.hour
+    current_minute = current_datetime.minute
+    current_second = current_datetime.second
+    return sender+str(current_hour)+str(current_minute)+str(current_second)+str(current_day)+str(current_month)+str(current_year)+reciever
 #########################################################################################################
 conn= psycopg2.connect(
     host="localhost",
@@ -226,15 +234,73 @@ if choice_today=="5":
         print("Invalid UPI Pin!!!!")
 
 #############################################################################################################
-# if choice == "1":
-#     sql ="begin;"
-#     mycursor.execute(sql)
-#     acc_num = input("Enter the customer id to which you would like to transfer money: ")
-#     pin = input("Enter your upi pin: ")
-#     if pin == Customer_1.M_pin:
-#         amount = int(input("Enter the amount you would like to transfer: "))
-#         balance_amount = int(Customer_1.Balance) - amount
-#         if balance_amount > 0:
+if choice_today == "1":
+    sql ="begin;"
+    mycursor.execute(sql)
+    acc_num = input("Enter the customer id to which you would like to transfer money: ")
+    pin = input("Enter your upi pin: ")
+    if pin == Customer_1.M_pin:
+        amount = int(input("Enter the amount you would like to transfer: "))
+        balance_amount = int(Customer_1.Balance) - amount
+        if balance_amount > 0:
+            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+            values = (balance_amount,Customer_1.Cust_id)
+            mycursor.execute(sql,values)
+            sql = "SELECT * FROM customer WHERE cust_id = %s;"
+            mycursor.execute(sql,(acc_num,))
+            data = mycursor.fetchone()
+            if data is not None:
+                transfer_amount = int(data[6])+amount
+                sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+                values = (transfer_amount,acc_num)
+                mycursor.execute(sql,values)
+                t_id=transaction_id_generator(Customer_1.Cust_id,acc_num)
+                current_date = datetime.date.today()
+                current_time = datetime.datetime.now().time()
+                sql = "INSERT INTO transactions VALUES (%s,%s,%s,%s,%s,%s);"
+                values=(t_id,Customer_1.Cust_id,acc_num,current_date,current_time,amount)
+                mycursor.execute(sql,values)
+                sql = "commit;"
+                mycursor.execute(sql)
+            else:
+                print("The account is not available!!!!")
+                sql = "rollback;"
+                mycursor.execute(sql)
+        else:
+            print("Insufficient balance.!!!!")
+            sql = "rollback;"
+            mycursor.execute(sql)
+    else:
+        print("Wrong UPI Pin!!!!!")
+        sql = "rollback;"
+        mycursor.execute(sql)
+if choice_today == "2":
+    sql = "SELECT * FROM customer WHERE cust_id = %s;"
+    mycursor.execute(sql,(Customer_1.Cust_id,))
+    rows=mycursor.fetchall()
+    if data is not None:
+        print("The balance amount is: Rs.",data[6])
+if choice_today == "3":
+    sql = "SELECT * FROM transactions;"
+    mycursor.execute(sql)
+    rows = mycursor.fetchall()
+    if rows is None:
+        print("No trasactions found")
+    else:
+        print("Transaction id\t\t\t Receiver\t amount\t")
+        for row in rows:
+            print(row[0],"\t",row[2],"\t\t",row[5])
+
+if choice_today =="6":
+    print("\n\nWhich of the following detail would you like to edit: \n")
+    print("             1.Name")
+    print("             2.Email")
+    print("             3.Phone Number")
+    print("             4.mpin")
+    edit_choice=input("Enter your choice: ")
+    
+
+
 
 
 

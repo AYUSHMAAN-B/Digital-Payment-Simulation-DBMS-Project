@@ -29,8 +29,8 @@ CREATE TABLE TRANSACTIONS (
 			trans_id	VARCHAR(100) NOT NULL,
 			sender_id	VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
 			reciever_id	VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
-			dte			date,
-			time		timestamp,
+			dte			VARCHAR(100),
+			time		VARCHAR(100),
 			amount		INT NOT NULL
 			
 			);

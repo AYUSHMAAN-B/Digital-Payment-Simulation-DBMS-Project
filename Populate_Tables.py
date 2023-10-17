@@ -1,12 +1,12 @@
 import psycopg2
 import csv
 
-conn = psycopg2.connect(host="/tmp",
-                        user="ayushmaan",
-                        password="123456",
+conn = psycopg2.connect(host="localhost",
+                        user="postgres",
+                        password="1234",
                         port=5432)
 
-cursor = conn.cursor()
+mycursor = conn.cursor()
         
 with open("Bank_Data.csv", "r") as ip:
     csv_reader = csv.reader(ip)
@@ -45,4 +45,4 @@ with open("Defaulters_Data.csv", "r") as ip:
 
 conn.commit()
 conn.close()
-cursor.close()
+mycursor.close()
