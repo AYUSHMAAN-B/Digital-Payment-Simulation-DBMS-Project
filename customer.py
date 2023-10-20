@@ -158,8 +158,8 @@ if choice == "1":
 ###########################################################################################################
 
     ch=int(input("Enter the branch of the bank in which your account is present: "))
-    sql = "SELECT branch_id FROM bank where bank_id = Bank_id;"
-    mycursor.execute(sql)
+    sql = "SELECT branch_id FROM bank where bank_id = %s;"
+    mycursor.execute(sql,(Bank_id,))
     rows = mycursor.fetchall()
     count  = 1
     for row in rows:
@@ -298,11 +298,6 @@ if choice_today =="6":
     print("             3.Phone Number")
     print("             4.mpin")
     edit_choice=input("Enter your choice: ")
-    
-
-
-
-
 
 conn.commit()
 conn.close()
