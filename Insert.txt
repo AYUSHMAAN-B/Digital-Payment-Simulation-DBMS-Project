@@ -14,3 +14,5 @@ INSERT INTO bank VALUES ('RJY', 'SBI', 'Rajahmundry', 'State Bank of India')
 INSERT INTO bank VALUES ('RJY', 'BOB', 'Rajahmundry', 'Bank of Boroda')
 INSERT INTO bank VALUES ('RJY', 'AXB', 'Rajahmundry', 'Axis Bank')
 INSERT INTO bank VALUES ('RJY', 'CAB', 'Rajahmundry', 'Canara Bank')
+
+UPDATE customer SET balance = 1000 WHERE cust_id = '00001';

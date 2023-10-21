@@ -117,7 +117,7 @@ print("\n\n")
 
 print("     1.New Customer: Sign Up                  2.Existing Customer: Login\n")
 choice =input("Please Enter your choice: ")
-############################################################################################################
+
 if choice == "1":
     print("\n\n             Please Fill the following Details:\n")
     Name=input("Enter Your Name: ")
@@ -135,9 +135,6 @@ if choice == "1":
     while(mpin_validate(M_pin)==False):
         M_pin = input("UPI Pin should be 6 digits. Please Enter Again: ")
 
-
-###########################################################################################################
-
     print("\n           BANKS LIST:")
     sql = "SELECT bank_name FROM bank;"
     mycursor.execute(sql)
@@ -153,11 +150,10 @@ if choice == "1":
     s = set(l)
 
     for ss in s:
-        print(ss)
+        print(count, ". ", ss)
+        count += 1
 
     ch = int(input("Enter in which bank is your account in: "))
-
-###########################################################################################################
 
     sql = "SELECT bank_id FROM bank;"
     mycursor.execute(sql)
@@ -173,9 +169,8 @@ if choice == "1":
 
         count = count + 1
 
-###########################################################################################################
     print(Bank_id)
-    print("             Branches Available \n")
+    print("             BRANCHES LIST \n")
     sql = "SELECT branch FROM bank where bank_id = %s;"
     mycursor.execute(sql,(Bank_id,))
     rows = mycursor.fetchall()
@@ -185,10 +180,9 @@ if choice == "1":
         row_str = '\t'.join(map(str, row))
         print(count,". ",row_str)
         count = count + 1
-    
-###########################################################################################################
 
     ch=int(input("Enter the branch of the bank in which your account is present: "))
+
     sql = "SELECT branch_id FROM bank where bank_id = %s;"
     mycursor.execute(sql,(Bank_id,))
     rows = mycursor.fetchall()
@@ -247,9 +241,23 @@ if choice == "1":
 
     print("\n\nThank you for choosing phonepe.")
 
+    conn.commit()
+    conn.close()
+    mycursor.close()
+
 ###########################################################################################################
     
 elif choice == "2":
+
+    conn= psycopg2.connect(
+    host="localhost",
+    port=5432,
+    database="phonepe",
+    user="postgres",
+    password="123456"
+    )
+
+    mycursor = conn.cursor()
 
     print("\n\nPlease Enter your details as follows:\n")
     Cust_id = input("Enter your customer id: ")
@@ -265,14 +273,10 @@ elif choice == "2":
     if data_out is not None:
         while(True):
             Customer_1 = Customer(data_out[0],data_out[1],data_out[2],data_out[3],data_out[4],data_out[6],data_out[7],data_out[8],data_out[5])
-            # Customer authentication is successful
-            if count == 1:
-                print("\nLogin successful. Welcome back, " + Customer_1.Name + "!")  # Assuming the name is in the second column (index 1)
-                count += 1
-            # Now you can implement the functionality for existing customers
-            # For example, display account balance, perform transactions, etc.
 
-            # Implement your functionality here
+            if count == 1:
+                print("\nLogin successful. Welcome back, " + Customer_1.Name + "!")
+                count += 1
 
             print("\n\n         What would you like to do today:\n")
             print("         1. Make a Transaction                     2. Check Your Balance\n")
@@ -284,66 +288,96 @@ elif choice == "2":
             print("\n\n")
 
             if choice_today == "1":
-                sql ="begin;"
-                mycursor.execute(sql)
+
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="postgres",
+                password="123456"
+                )
+
+                mycursor = conn.cursor()
+
+                mycursor.execute("BEGIN")
+
+                sql = "SELECT * FROM customer WHERE cust_id = %s AND mpin = %s;"
+                mycursor.execute(sql, (Cust_id, UPI_Pin))
+                data_from = mycursor.fetchone()
 
                 acc_num = input("Enter the customer id to which you would like to transfer money: ")
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
                 mycursor.execute(sql,(acc_num,))
-                data_in = mycursor.fetchone()
+                data_to = mycursor.fetchone()
 
-                if data_in is None:
+                if data_to is None:
                     print("The account is not available!!!!")
-                    sql = "rollback;"
-                    mycursor.execute(sql)
+                    mycursor.execute("ROLLBACK")
                 else:
-                    pin = input("Enter your upi pin: ")
+                    pin = input("Enter your UPI pin: ")
 
-                    if pin == Customer_1.M_pin:
+                    if pin == data_from[4]:
+                        print("Your current balance is : Rs. ", data_from[6], " /-")
                         amount = int(input("Enter the amount you would like to transfer: "))
-                        balance_amount = int(Customer_1.Balance) - amount
+                        balance_amount = data_from[6] - amount
 
                         if balance_amount > 0:
                             sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-                            values = (balance_amount,Customer_1.Cust_id)
-                            mycursor.execute(sql,values)
+                            values = (balance_amount, data_from[0])
+                            mycursor.execute(sql, values)
 
-                            transfer_amount = int(data_in[6])+amount
+                            transfer_amount = int(data_to[6]) + amount
                             sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-                            values = (transfer_amount,acc_num)
-                            mycursor.execute(sql,values)
+                            values = (transfer_amount, acc_num)
+                            mycursor.execute(sql, values)
 
-                            t_id=transaction_id_generator(Customer_1.Cust_id,acc_num)
+                            t_id=transaction_id_generator(data_from[0], acc_num)
                             current_date = datetime.date.today()
                             current_time = datetime.datetime.now().time()
 
                             sql = "INSERT INTO transactions VALUES (%s,%s,%s,%s,%s,%s);"
-                            values=(t_id,Customer_1.Cust_id,acc_num,current_date,current_time,amount)
+                            values=(t_id, data_from[0], acc_num, current_date, current_time, amount)
                             mycursor.execute(sql,values)
 
-                            sql = "commit;"
-                            mycursor.execute(sql)
+                            mycursor.execute("COMMIT")
 
                             print("The money has been sent successfully.")
                         else:
                             print("Insufficient balance.!!!!")
-                            sql = "rollback;"
-                            mycursor.execute(sql)
+                            
+                            mycursor.execute("ROLLBACK")
                     else:
                         print("Wrong UPI Pin!!!!!")
-                        sql = "rollback;"
-                        mycursor.execute(sql)
+                        mycursor.execute("ROLLBACK")
 
             elif choice_today == "2":
+
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="postgres",
+                password="123456"
+                )
+
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
                 mycursor.execute(sql,(Customer_1.Cust_id,))
-                rows=mycursor.fetchall()
-                if data_out is not None:
-                    print("|-------------------------------------------")
-                    print("|   The balance amount is: Rs.",data_out[6], "/-\t|")
-                    print("|-------------------------------------------")
+                rows=mycursor.fetchone()
+
+                print("|-------------------------------------------")
+                print("|   The balance amount is: Rs.",rows[6], "/-\t|")
+                print("|-------------------------------------------")
 
             elif choice_today == "3":
+
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="postgres",
+                password="123456"
+                )
+
                 sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s;"
                 mycursor.execute(sql, (Customer_1.Cust_id, Customer_1.Cust_id))
                 rows = mycursor.fetchall()
@@ -358,6 +392,15 @@ elif choice == "2":
                     print("|-------------------------------------------------------------------------------|")
 
             elif choice_today == "4":
+
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="postgres",
+                password="123456"
+                )
+
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
                 mycursor.execute(sql,(Customer_1.Cust_id,))
                 rows=mycursor.fetchall()
@@ -387,6 +430,15 @@ elif choice == "2":
                         mycursor.execute("COMMIT")
 
             elif choice_today=="5":
+
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="postgres",
+                password="123456"
+                )
+
                 pin = input("Enter the upi pin: ")
                 if pin == Customer_1.M_pin:
                     print("\n\n|----------------------------------------------------------------|\n")
@@ -399,14 +451,25 @@ elif choice == "2":
                     print("|----------------------------------------------------------------|")
                 else:
                     print("Invalid UPI Pin!!!!")
+            
 
             elif choice_today =="6":
+
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="postgres",
+                password="123456"
+                )
+
                 print("\n\nWhich of the following detail would you like to edit: \n")
                 print("             1.Name")
                 print("             2.Email")
                 print("             3.Phone Number")
                 print("             4.mpin")
                 edit_choice=input("Enter your choice: ")
+
             elif choice_today == '7':
                 break
             mycursor.execute("COMMIT")

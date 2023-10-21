@@ -1,13 +1,13 @@
 IN CUSTOMER.PY
 
-New Customer Inserting
-Code for editing details
-Code for taking loan
-Check transactions with a particular person
-Code for sent transactions
-Code for recieved transactions
-Code for paying the loans
-Checking for defaulters while doing transactions
+1 --> New Customer Inserting
+4 --> Code for taking loan
+5 --> Code for editing details
+ -- Check transactions with a particular person
+ -- Code for sent transactions
+ -- Code for recieved transactions
+ -- Code for paying the loans
+ -- Checking for defaulters while doing transactions
 
 IN ADMIN.PY
 
