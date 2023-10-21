@@ -518,7 +518,7 @@ elif choice == "2":
                 password="123456"
                 )
 
-                pin = input("Enter the upi pin: ")
+                pin = input("Enter the UPI : ")
                 if pin == Customer_1.M_pin:
                     print("\n\n|----------------------------------------------------------------|\n")
                     print("|         Customer id: ",Customer_1.Cust_id,"\n")
@@ -529,7 +529,7 @@ elif choice == "2":
                     print("|         Balance: Rs.",Customer_1.Balance,"\n")
                     print("|----------------------------------------------------------------|")
                 else:
-                    print("Invalid UPI Pin!!!!")
+                    print("\nInvalid UPI Pin!!!!")
             
 
             elif choice_today =="6":
@@ -542,18 +542,37 @@ elif choice == "2":
                 password="123456"
                 )
 
-                print("\n\nWhich of the following detail would you like to edit: \n")
-                print("             1.Name")
-                print("             2.Email")
-                print("             3.Phone Number")
-                print("             4.mpin")
-                edit_choice=input("Enter your choice: ")
+                print("\n\nWhich of the following detail would you like to edit: \n\n")
+                print("             1. Name")
+                print("             2. Phone Number")
+                print("             3. Email")
+                print("             4. MPIN")
+                edit_choice=input("\nEnter your choice: ")
+
+                if edit_choice == "1":
+                    new = input("Enter your new name : ")
+                    sql = "UPDATE customer SET name = %s WHERE cust_id = %s"
+                    mycursor.execute(sql, ( new, Customer_1.Cust_id ))
+                if edit_choice == "2":
+                    new = input("Enter your new phone number : ")
+                    sql = "UPDATE customer SET phone = %s WHERE cust_id = %s"
+                    mycursor.execute(sql, ( new, Customer_1.Cust_id ))
+                if edit_choice == "3":
+                    new = input("Enter your new email : ")
+                    sql = "UPDATE customer SET email = %s WHERE cust_id = %s"
+                    mycursor.execute(sql, ( new, Customer_1.Cust_id ))
+                if edit_choice == "4":
+                    new = input("Enter your new MPIN : ")
+                    sql = "UPDATE customer SET mpin = %s WHERE cust_id = %s"
+                    mycursor.execute(sql, ( new, Customer_1.Cust_id ))
+
+                print("Information updated successfully.")
 
             elif choice_today == '7':
                 break
             mycursor.execute("COMMIT")
     else:
-        print("\nLogin failed. Please check your Customer id and UPI pin.")
+        print("\nLogin failed. Please check your Customer ID and UPI pin.")
 
 ################################################################################################################
 

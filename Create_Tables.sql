@@ -24,6 +24,8 @@ CREATE TABLE CUSTOMER (
 
 			FOREIGN KEY (bank_id, branch_id) REFERENCES BANK (bank_id, branch_id)
 
+			UNIQUE (phone)
+
 );
 
 			

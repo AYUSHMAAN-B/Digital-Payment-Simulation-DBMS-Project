@@ -2,7 +2,6 @@ IN CUSTOMER.PY
 
 1 --> New Customer Inserting
 4 --> Code for taking loan
-5 --> Code for editing details
  -- Code for paying the loans
  -- Checking for defaulters while doing transactions
 
