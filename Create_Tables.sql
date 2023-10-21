@@ -6,7 +6,7 @@ CREATE TABLE BANK (
 			bank_name	VARCHAR(255) NOT NULL,
 			
 			PRIMARY KEY (branch_id, bank_id),
-			UNIQUE (bank_id)
+			UNIQUE (branch_id, bank_id)
 			
 			);
 			
@@ -40,18 +40,20 @@ CREATE TABLE TRANSACTIONS (
 			
 CREATE TABLE LOAN (
 
-			loan_id		VARCHAR(100) NOT NULL,
+			loan_id		VARCHAR(100) NOT NULL PRIMARY KEY,
 			bank_id		VARCHAR(255) NOT NULL REFERENCES BANK(bank_id),
 			cust_id		VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
 			amount		INT  NOT NULL,
 			emi			INT NOT NULL,
-			deadline	timestamp
+			deadline	timestamp,
+
+			UNIQUE (loan_id)
 
 			);
 			
 CREATE TABLE DEFAULTER (
 
-			cust_id 	VARCHAR(100) NOT NULL REFERENCES LOAN(cust_id),
+			cust_id 	VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
 			due 		INT  NOT NULL,
 			penalty 	INT NOT NULL
 

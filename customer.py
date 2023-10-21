@@ -85,7 +85,7 @@ conn= psycopg2.connect(
     port=5432,
     database="phonepe",
     user="postgres",
-    password="1234"
+    password="123456"
 )
 
 mycursor = conn.cursor()
@@ -204,7 +204,7 @@ if choice == "1":
 
     # cust_id | name | phone | email | mpin | acc_no | balance | bank_id | branch_id
     mycursor.execute(sql)
-    print("\n\nSign in Successful.. Thank you for choosing phonepe. What would you like to do today: ")
+    
     print("\n\nSign in Successful. Here are your details.\n")
 
     print("Cust_ID : " , Customer_1.Cust_id)
@@ -223,6 +223,9 @@ if choice == "1":
 
     print("Bank : ", bank)
     print("Branch : ", branch)
+
+    print("\n\nThank you for choosing phonepe.")
+
 ###########################################################################################################
     
 elif choice == "2":
@@ -234,7 +237,6 @@ elif choice == "2":
     sql = "SELECT * FROM customer WHERE cust_id = %s AND mpin = %s;"
     mycursor.execute(sql, (Cust_id, UPI_Pin))
     data = mycursor.fetchone()
-    # Customer_1 = Customer(Cust_id,Name,Phone,Email,M_pin,0,Bank_id,Branch_id,Account_num)
     
 
     if data is not None:
@@ -246,96 +248,99 @@ elif choice == "2":
 
         # Implement your functionality here
 
+        print("\n\n         What would you like to do today:\n")
+        print("         1.Make a Transaction                     2. Check Your Balance\n")
+        print("         3.Check Your Transactions list           4. Take a loan\n")
+        print("         5.Check your details                     6. Edit your details\n")
+        choice_today = input("Enter your choice: ")
+
+        if choice_today == "1":
+            sql ="begin;"
+            mycursor.execute(sql)
+            acc_num = input("Enter the customer id to which you would like to transfer money: ")
+            pin = input("Enter your upi pin: ")
+            if pin == Customer_1.M_pin:
+                amount = int(input("Enter the amount you would like to transfer: "))
+                balance_amount = int(Customer_1.Balance) - amount
+                if balance_amount > 0:
+                    sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+                    values = (balance_amount,Customer_1.Cust_id)
+                    mycursor.execute(sql,values)
+                    sql = "SELECT * FROM customer WHERE cust_id = %s;"
+                    mycursor.execute(sql,(acc_num,))
+                    data = mycursor.fetchone()
+                    if data is not None:
+                        transfer_amount = int(data[6])+amount
+                        sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+                        values = (transfer_amount,acc_num)
+                        mycursor.execute(sql,values)
+                        t_id=transaction_id_generator(Customer_1.Cust_id,acc_num)
+                        current_date = datetime.date.today()
+                        current_time = datetime.datetime.now().time()
+                        sql = "INSERT INTO transactions VALUES (%s,%s,%s,%s,%s,%s);"
+                        values=(t_id,Customer_1.Cust_id,acc_num,current_date,current_time,amount)
+                        mycursor.execute(sql,values)
+                        sql = "commit;"
+                        mycursor.execute(sql)
+                    else:
+                        print("The account is not available!!!!")
+                        sql = "rollback;"
+                        mycursor.execute(sql)
+                else:
+                    print("Insufficient balance.!!!!")
+                    sql = "rollback;"
+                    mycursor.execute(sql)
+            else:
+                print("Wrong UPI Pin!!!!!")
+                sql = "rollback;"
+                mycursor.execute(sql)
+
+        if choice_today == "2":
+            sql = "SELECT * FROM customer WHERE cust_id = %s;"
+            mycursor.execute(sql,(Customer_1.Cust_id,))
+            rows=mycursor.fetchall()
+            if data is not None:
+                print("The balance amount is: Rs.",data[6], "/-")
+
+        if choice_today == "3":
+            sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s;"
+            mycursor.execute(sql, (Customer_1.Cust_id, Customer_1.Cust_id))
+            rows = mycursor.fetchall()
+            if rows is None:
+                print("No trasactions found")
+            else:
+                print("Transaction id\t\t\t Sender\t Receiver\t amount\t")
+                for row in rows:
+                    print(row[0],"\t",row[2],"\t\t",row[5])
+
+        if choice_today=="5":
+            pin = input("Enter the upi pin: ")
+            if pin == Customer_1.M_pin:
+                print("\n\n----------------------------------------------------------------\n")
+                print("         Customer id: ",Customer_1.Cust_id,"\n")
+                print("         Name: ",Customer_1.Name,"\n")
+                print("         Phone Number: ",Customer_1.Phone,"\n")
+                print("         Email: ",Customer_1.Email,"\n")
+                print("         Account Number: ",Customer_1.Account_num,"\n")
+                print("         Balance: Rs.",Customer_1.Balance,"\n")
+                print("----------------------------------------------------------------")
+            else:
+                print("Invalid UPI Pin!!!!")
+
+        if choice_today =="6":
+            print("\n\nWhich of the following detail would you like to edit: \n")
+            print("             1.Name")
+            print("             2.Email")
+            print("             3.Phone Number")
+            print("             4.mpin")
+            edit_choice=input("Enter your choice: ")
+
     else:
-        print("\nLogin failed. Please check your customer id and UPI pin.")
+        print("\nLogin failed. Please check your Customer id and UPI pin.")
 
 ################################################################################################################
 
-print("\n\n         What would you like to do today:\n")
-print("         1.Make a Transaction                     2.Check Your Balance\n")
-print("         3.Check Your Transactions list           4. Take a loan\n")
-print("         5.Check your details                     6. Edit your details\n")
-choice_today = input("Enter your choice: ")
-#############################################################################################################
-if choice_today=="5":
-    pin = input("Enter the upi pin: ")
-    if pin == Customer_1.M_pin:
-        print("\n\n----------------------------------------------------------------")
-        print("\n         Customer id: ",Customer_1.Cust_id,"\n")
-        print("         Name: ",Customer_1.Name,"\n")
-        print("         Phone Number: ",Customer_1.Phone,"\n")
-        print("         Email: ",Customer_1.Email,"\n")
-        print("         Account Number: ",Customer_1.Account_num,"\n")
-        print("         Balance: Rs.",Customer_1.Balance,"\n")
-        print("----------------------------------------------------------------")
-    else:
-        print("Invalid UPI Pin!!!!")
 
-#############################################################################################################
-if choice_today == "1":
-    sql ="begin;"
-    mycursor.execute(sql)
-    acc_num = input("Enter the customer id to which you would like to transfer money: ")
-    pin = input("Enter your upi pin: ")
-    if pin == Customer_1.M_pin:
-        amount = int(input("Enter the amount you would like to transfer: "))
-        balance_amount = int(Customer_1.Balance) - amount
-        if balance_amount > 0:
-            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-            values = (balance_amount,Customer_1.Cust_id)
-            mycursor.execute(sql,values)
-            sql = "SELECT * FROM customer WHERE cust_id = %s;"
-            mycursor.execute(sql,(acc_num,))
-            data = mycursor.fetchone()
-            if data is not None:
-                transfer_amount = int(data[6])+amount
-                sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-                values = (transfer_amount,acc_num)
-                mycursor.execute(sql,values)
-                t_id=transaction_id_generator(Customer_1.Cust_id,acc_num)
-                current_date = datetime.date.today()
-                current_time = datetime.datetime.now().time()
-                sql = "INSERT INTO transactions VALUES (%s,%s,%s,%s,%s,%s);"
-                values=(t_id,Customer_1.Cust_id,acc_num,current_date,current_time,amount)
-                mycursor.execute(sql,values)
-                sql = "commit;"
-                mycursor.execute(sql)
-            else:
-                print("The account is not available!!!!")
-                sql = "rollback;"
-                mycursor.execute(sql)
-        else:
-            print("Insufficient balance.!!!!")
-            sql = "rollback;"
-            mycursor.execute(sql)
-    else:
-        print("Wrong UPI Pin!!!!!")
-        sql = "rollback;"
-        mycursor.execute(sql)
-if choice_today == "2":
-    sql = "SELECT * FROM customer WHERE cust_id = %s;"
-    mycursor.execute(sql,(Customer_1.Cust_id,))
-    rows=mycursor.fetchall()
-    if data is not None:
-        print("The balance amount is: Rs.",data[6])
-if choice_today == "3":
-    sql = "SELECT * FROM transactions;"
-    mycursor.execute(sql)
-    rows = mycursor.fetchall()
-    if rows is None:
-        print("No trasactions found")
-    else:
-        print("Transaction id\t\t\t Receiver\t amount\t")
-        for row in rows:
-            print(row[0],"\t",row[2],"\t\t",row[5])
-
-if choice_today =="6":
-    print("\n\nWhich of the following detail would you like to edit: \n")
-    print("             1.Name")
-    print("             2.Email")
-    print("             3.Phone Number")
-    print("             4.mpin")
-    edit_choice=input("Enter your choice: ")
 
 conn.commit()
 conn.close()
