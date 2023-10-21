@@ -218,7 +218,7 @@ if choice == "1":
     # cust_id | name | phone | email | mpin | acc_no | balance | bank_id | branch_id
 
     sql = "INSERT INTO customer (cust_id, name, phone, email, mpin, acc_no, balance, bank_id, branch_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    mycursor.execute(sql, l)
+    mycursor.execute(sql, (l,))
     
     print("\n\nSign in Successful. Here are your details.\n")
 
@@ -378,18 +378,97 @@ elif choice == "2":
                 password="123456"
                 )
 
-                sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s;"
-                mycursor.execute(sql, (Customer_1.Cust_id, Customer_1.Cust_id))
-                rows = mycursor.fetchall()
-                if rows is None:
-                    print("No trasactions found")
-                else:
-                    print("|-------------------------------------------------------------------------------|")
-                    print("| Transaction id\t\t| Sender\t| Receiver\t| amount\t|")
-                    print("|-------------------------------------------------------------------------------|")
-                    for row in rows:
-                        print("|", row[0],"\t|",row[1],"\t|",row[2],"\t|",row[5],"\t\t|")
-                    print("|-------------------------------------------------------------------------------|")
+                print("\t 1. Complete Transaction")
+                print("\t 2. Transactions done by you")
+                print("\t 3. Transactions done to you")
+                print("\t 4. Transactions with a person")
+
+                trans_choice = input("Select from above : ")
+
+                if( trans_choice == "1" ):
+
+                    sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s ORDER BY dte, time DESC"
+                    mycursor.execute(sql, (Customer_1.Cust_id, Customer_1.Cust_id))
+                    rows = mycursor.fetchall()
+                    if rows is None:
+                        print("No trasactions found")
+                    else:
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+                        print("| Transaction id\t\t| Sender\t| Receiver\t| Date\t\t| Time\t\t\t| amount\t|")
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
+                        for row in rows:
+                            print("|", row[0],"\t|",row[1],"\t|",row[2],"\t|",row[3],"\t|",row[4],"\t|",row[5],"\t\t|")
+
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
+                elif trans_choice == "2":
+                    sql = "SELECT * FROM transactions WHERE sender_id = %s ORDER BY dte, time DESC"
+                    mycursor.execute(sql, (Customer_1.Cust_id,))
+                    rows = mycursor.fetchall()
+
+                    if rows is None:
+                        print("No transactions found")
+                    else:
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+                        print("| Transaction id\t\t| Receiver\t| Date\t\t| Time\t\t\t| amount\t|")
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
+                        for row in rows:
+                            sql = "SELECT name FROM customer WHERE cust_id = %s"
+                            mycursor.execute(sql, (row[2],))
+                            name = mycursor.fetchone()
+
+                            print("|", row[0],"\t|",name[0],"\t|",row[3],"\t|",row[4],"\t|",row[5],"\t\t|")
+                        
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
+                elif trans_choice == "3":
+                    sql = "SELECT * FROM transactions WHERE reciever_id = %s ORDER BY dte, time DESC"
+                    mycursor.execute(sql, (Customer_1.Cust_id,))
+                    rows = mycursor.fetchall()
+
+                    if rows is None:
+                        print("No transactions found")
+                    else:
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+                        print("| Transaction id\t\t| Sender\t| Date\t\t| Time\t\t\t| amount\t|")
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
+                        for row in rows:
+                            sql = "SELECT name FROM customer WHERE cust_id = %s"
+                            mycursor.execute(sql, (row[1],))
+                            name = mycursor.fetchone()
+
+                            print("|", row[0],"\t|",name[0],"\t|",row[3],"\t|",row[4],"\t|",row[5],"\t\t|")
+                        
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
+                elif trans_choice == "4":
+                    person = input("Enter person id : ")
+                    sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s ORDER BY dte, time DESC"
+                    mycursor.execute(sql, (person, person))
+                    rows = mycursor.fetchall()
+                    if rows is None:
+                        print("No trasactions found")
+                    else:
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+                        print("| Transaction id\t\t| Sender\t| Receiver\t| Date\t\t| Time\t\t\t| amount\t|")
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
+                        for row in rows:
+                            sql = "SELECT name FROM customer WHERE cust_id = %s"
+                            mycursor.execute(sql, (row[1],))
+                            sender = mycursor.fetchone()
+
+                            sql = "SELECT name FROM customer WHERE cust_id = %s"
+                            mycursor.execute(sql, (row[2],))
+                            reciever = mycursor.fetchone()
+
+                            print("|", row[0],"\t|",sender[0],"\t|",reciever[0],"\t|",row[3],"\t|",row[4],"\t|",row[5],"\t\t|")
+
+                        print("|-----------------------------------------------------------------------------------------------------------------------|")
+
 
             elif choice_today == "4":
 
@@ -478,14 +557,6 @@ elif choice == "2":
 
 ################################################################################################################
 
-
-
 conn.commit()
 conn.close()
 mycursor.close()
-
-
-
-
-
-
