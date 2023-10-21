@@ -5,8 +5,8 @@ CREATE TABLE BANK (
 			branch		VARCHAR(255) NOT NULL,
 			bank_name	VARCHAR(255) NOT NULL,
 			
-			PRIMARY KEY(branch_id, bank_id),
-			UNIQUE(bank_id)
+			PRIMARY KEY (branch_id, bank_id),
+			UNIQUE (bank_id)
 			
 			);
 			
@@ -40,7 +40,7 @@ CREATE TABLE TRANSACTIONS (
 			
 CREATE TABLE LOAN (
 
-			loan_id		VARCHAR(100) NOT NULL PRIMARY KEY,
+			loan_id		VARCHAR(100) NOT NULL,
 			bank_id		VARCHAR(255) NOT NULL REFERENCES BANK(bank_id),
 			cust_id		VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
 			amount		INT  NOT NULL,

@@ -205,6 +205,9 @@ if choice == "1":
     # cust_id | name | phone | email | mpin | acc_no | balance | bank_id | branch_id
     mycursor.execute(sql)
     print("\n\nSign in Successful.. Thank you for choosing phonepe. What would you like to do today: ")
+    print("\n\nSign in Successful. Here are your details.\n")
+
+    
 ###########################################################################################################
     
 elif choice == "2":
