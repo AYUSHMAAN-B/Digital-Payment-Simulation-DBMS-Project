@@ -84,6 +84,52 @@ def transaction_id_generator(sender,reciever):
 def generate_loan_id(bank_id, cust_id):
     return bank_id+cust_id
 
+
+def search():
+    satisfied = False
+    
+    while not satisfied:
+        search_string = input("Enter the string to search : ")
+
+        sql = "SELECT name FROM customer WHERE name LIKE %s"
+        mycursor.execute(sql, (search_string + "%", ))
+        l = []
+        rows = mycursor.fetchall()
+        for row in rows:
+            l.append(row[0])
+
+        sql = "SELECT name FROM customer WHERE name LIKE %s"
+        mycursor.execute(sql, ("%" + search_string + "%", ))
+        rows = mycursor.fetchall()
+        for row in rows:
+            l.append(row[0])
+
+        sql = "SELECT name FROM customer WHERE name LIKE %s"
+        mycursor.execute(sql, ("%" + search_string, ))
+        rows = mycursor.fetchall()
+        for row in rows:
+            l.append(row[0])
+
+        s = set(l)
+
+        for ss in s:
+            print(s)
+
+        found = input("Enter the full name if you found. Type \'RETRY\' to try again or to exit type EXIT : ")
+
+        if found == "RETRY":
+            satisfied = False
+        elif found == "EXIT":
+            satisfied = True
+            return "EXIT"
+        else:
+            satisfied = True
+            sql = "SELECT cust_id FROM customer WHERE name = %s"
+            mycursor.execute(sql, (found, ))
+            name = mycursor.fetchone()
+            print("**********Name = ", name)
+            return name[0]
+
 #########################################################################################################
 
 conn= psycopg2.connect(
@@ -305,7 +351,13 @@ elif choice == "2":
                 mycursor.execute(sql, (Cust_id, UPI_Pin))
                 data_from = mycursor.fetchone()
 
-                acc_num = input("Enter the customer id to which you would like to transfer money: ")
+                acc_num = input("Enter the customer id to which you would like to transfer money [Type \'SEARCH\' to search for names]: ")
+
+                if acc_num == "SEARCH":
+                    acc_num = search()
+                    if acc_num == "EXIT":
+                        continue
+
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
                 mycursor.execute(sql,(acc_num,))
                 data_to = mycursor.fetchone()
@@ -314,41 +366,44 @@ elif choice == "2":
                     print("The account is not available!!!!")
                     mycursor.execute("ROLLBACK")
                 else:
-                    pin = input("Enter your UPI pin: ")
-
-                    if pin == data_from[4]:
-                        print("Your current balance is : Rs. ", data_from[6], " /-")
-                        amount = int(input("Enter the amount you would like to transfer: "))
-                        balance_amount = data_from[6] - amount
-
-                        if balance_amount > 0:
-                            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-                            values = (balance_amount, data_from[0])
-                            mycursor.execute(sql, values)
-
-                            transfer_amount = int(data_to[6]) + amount
-                            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-                            values = (transfer_amount, acc_num)
-                            mycursor.execute(sql, values)
-
-                            t_id=transaction_id_generator(data_from[0], acc_num)
-                            current_date = datetime.date.today()
-                            current_time = datetime.datetime.now().time()
-
-                            sql = "INSERT INTO transactions VALUES (%s,%s,%s,%s,%s,%s);"
-                            values=(t_id, data_from[0], acc_num, current_date, current_time, amount)
-                            mycursor.execute(sql,values)
-
-                            mycursor.execute("COMMIT")
-
-                            print("The money has been sent successfully.")
-                        else:
-                            print("Insufficient balance.!!!!")
-                            
-                            mycursor.execute("ROLLBACK")
+                    if data_from[0] == data_to[0]:
+                        print("You cant send money to yourself. Try typing different customer ID")
                     else:
-                        print("Wrong UPI Pin!!!!!")
-                        mycursor.execute("ROLLBACK")
+                        pin = input("Enter your UPI pin: ")
+
+                        if pin == data_from[4]:
+                            print("Your current balance is : Rs. ", data_from[6], " /-")
+                            amount = int(input("Enter the amount you would like to transfer: "))
+                            balance_amount = data_from[6] - amount
+
+                            if balance_amount > 0:
+                                sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+                                values = (balance_amount, data_from[0])
+                                mycursor.execute(sql, values)
+
+                                transfer_amount = int(data_to[6]) + amount
+                                sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+                                values = (transfer_amount, acc_num)
+                                mycursor.execute(sql, values)
+
+                                t_id=transaction_id_generator(data_from[0], acc_num)
+                                current_date = datetime.date.today()
+                                current_time = datetime.datetime.now().time()
+
+                                sql = "INSERT INTO transactions VALUES (%s,%s,%s,%s,%s,%s);"
+                                values=(t_id, data_from[0], acc_num, current_date, current_time, amount)
+                                mycursor.execute(sql,values)
+
+                                mycursor.execute("COMMIT")
+
+                                print("The money has been sent successfully.")
+                            else:
+                                print("Insufficient balance.!!!!")
+                                
+                                mycursor.execute("ROLLBACK")
+                        else:
+                            print("Wrong UPI Pin!!!!!")
+                            mycursor.execute("ROLLBACK")
 
             elif choice_today == "2":
 
@@ -555,14 +610,20 @@ elif choice == "2":
                     mycursor.execute(sql, ( new, Customer_1.Cust_id ))
                 if edit_choice == "2":
                     new = input("Enter your new phone number : ")
+                    while(phone_num_validate(new)==False):
+                        Phone = input("Invalid phone number. Please Enter Again: ")
                     sql = "UPDATE customer SET phone = %s WHERE cust_id = %s"
                     mycursor.execute(sql, ( new, Customer_1.Cust_id ))
                 if edit_choice == "3":
                     new = input("Enter your new email : ")
+                    while(email_validate(new)==False):
+                        Email = input("Invalid Email entered. Email should end with '@gmail.com'.\nPlease Enter Again: ")
                     sql = "UPDATE customer SET email = %s WHERE cust_id = %s"
                     mycursor.execute(sql, ( new, Customer_1.Cust_id ))
                 if edit_choice == "4":
                     new = input("Enter your new MPIN : ")
+                    while(mpin_validate(M_pin)==False):
+                        M_pin = input("UPI Pin should be 6 digits. Please Enter Again: ")
                     sql = "UPDATE customer SET mpin = %s WHERE cust_id = %s"
                     mycursor.execute(sql, ( new, Customer_1.Cust_id ))
 
