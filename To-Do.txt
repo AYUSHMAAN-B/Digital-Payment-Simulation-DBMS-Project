@@ -1,7 +1,8 @@
-1. ER Diagram 
-2. Python code to create database
-3. Python code to create tables
-4. Python code to generate tables
-5. Queries
-6. Athentication
-7. UI
+1. Inserting customers via python
+2. Making transactions
+3. Populating transactions
+4. Code for Viewing detials [UI]
+5. Code for editing details
+6. Code for viewing balance
+7. Code for taking loan
+8. COde for checking transactions [UI]
