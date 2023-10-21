@@ -1,8 +1,22 @@
-1. Inserting customers via python
-2. Making transactions
-3. Populating transactions
-4. Code for Viewing detials [UI]
-5. Code for editing details
-6. Code for viewing balance
-7. Code for taking loan
-8. Code for checking transactions [UI]
+IN CUSTOMER.PY
+
+New Customer Inserting
+Code for editing details
+Code for taking loan
+Check transactions with a particular person
+Code for sent transactions
+Code for recieved transactions
+Code for paying the loans
+Checking for defaulters while doing transactions
+
+IN ADMIN.PY
+
+Modify bank data
+Add banks
+See every possible/permissable data
+
+
+ERRORS
+
+While inserting new customer | Error : TypeError: not all arguments converted during string formatting | line 236
+Soon after taking loan, balance is not updated in the UI

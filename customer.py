@@ -81,6 +81,9 @@ def transaction_id_generator(sender,reciever):
     current_second = current_datetime.second
     return sender+str(current_hour)+str(current_minute)+str(current_second)+str(current_day)+str(current_month)+str(current_year)+reciever
 
+def generate_loan_id(bank_id, cust_id):
+    return bank_id+cust_id
+
 #########################################################################################################
 
 conn= psycopg2.connect(
@@ -214,13 +217,13 @@ if choice == "1":
     l.append(Customer_1.Email)
     l.append(Customer_1.M_pin)
     l.append(Customer_1.Account_num)
-    l.append(int(0))
+    l.append(0)
     l.append(Customer_1.Bank_id)
     l.append(Customer_1.Branch_id)
 
     # cust_id | name | phone | email | mpin | acc_no | balance | bank_id | branch_id
 
-    sql = "INSERT INTO customer (cust_id, name, phone, email, mpin, acc_no, balance, bank_id, branch_id) VALUES (%s, %s, %s, %s, %s, %s, %d, %s, %s)"
+    sql = "INSERT INTO customer (cust_id, name, phone, email, mpin, acc_no, balance, bank_id, branch_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
     mycursor.execute(sql, l)
     
     print("\n\nSign in Successful. Here are your details.\n")
@@ -255,13 +258,13 @@ elif choice == "2":
     # Check if the customer with the given Cust_id and UPI_Pin exists in the database
     sql = "SELECT * FROM customer WHERE cust_id = %s AND mpin = %s;"
     mycursor.execute(sql, (Cust_id, UPI_Pin))
-    data = mycursor.fetchone()
+    data_out = mycursor.fetchone()
     
     count = 1
 
-    if data is not None:
+    if data_out is not None:
         while(True):
-            Customer_1 = Customer(data[0],data[1],data[2],data[3],data[4],data[6],data[7],data[8],data[5])
+            Customer_1 = Customer(data_out[0],data_out[1],data_out[2],data_out[3],data_out[4],data_out[6],data_out[7],data_out[8],data_out[5])
             # Customer authentication is successful
             if count == 1:
                 print("\nLogin successful. Welcome back, " + Customer_1.Name + "!")  # Assuming the name is in the second column (index 1)
@@ -278,90 +281,135 @@ elif choice == "2":
             print("         7. Exit")
             choice_today = input("Enter your choice: ")
 
+            print("\n\n")
+
             if choice_today == "1":
                 sql ="begin;"
                 mycursor.execute(sql)
+
                 acc_num = input("Enter the customer id to which you would like to transfer money: ")
-                pin = input("Enter your upi pin: ")
-                if pin == Customer_1.M_pin:
-                    amount = int(input("Enter the amount you would like to transfer: "))
-                    balance_amount = int(Customer_1.Balance) - amount
-                    if balance_amount > 0:
-                        sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-                        values = (balance_amount,Customer_1.Cust_id)
-                        mycursor.execute(sql,values)
-                        sql = "SELECT * FROM customer WHERE cust_id = %s;"
-                        mycursor.execute(sql,(acc_num,))
-                        data = mycursor.fetchone()
-                        if data is not None:
-                            transfer_amount = int(data[6])+amount
+                sql = "SELECT * FROM customer WHERE cust_id = %s;"
+                mycursor.execute(sql,(acc_num,))
+                data_in = mycursor.fetchone()
+
+                if data_in is None:
+                    print("The account is not available!!!!")
+                    sql = "rollback;"
+                    mycursor.execute(sql)
+                else:
+                    pin = input("Enter your upi pin: ")
+
+                    if pin == Customer_1.M_pin:
+                        amount = int(input("Enter the amount you would like to transfer: "))
+                        balance_amount = int(Customer_1.Balance) - amount
+
+                        if balance_amount > 0:
+                            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+                            values = (balance_amount,Customer_1.Cust_id)
+                            mycursor.execute(sql,values)
+
+                            transfer_amount = int(data_in[6])+amount
                             sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
                             values = (transfer_amount,acc_num)
                             mycursor.execute(sql,values)
+
                             t_id=transaction_id_generator(Customer_1.Cust_id,acc_num)
                             current_date = datetime.date.today()
                             current_time = datetime.datetime.now().time()
+
                             sql = "INSERT INTO transactions VALUES (%s,%s,%s,%s,%s,%s);"
                             values=(t_id,Customer_1.Cust_id,acc_num,current_date,current_time,amount)
                             mycursor.execute(sql,values)
+
                             sql = "commit;"
                             mycursor.execute(sql)
+
+                            print("The money has been sent successfully.")
                         else:
-                            print("The account is not available!!!!")
+                            print("Insufficient balance.!!!!")
                             sql = "rollback;"
                             mycursor.execute(sql)
                     else:
-                        print("Insufficient balance.!!!!")
+                        print("Wrong UPI Pin!!!!!")
                         sql = "rollback;"
                         mycursor.execute(sql)
-                else:
-                    print("Wrong UPI Pin!!!!!")
-                    sql = "rollback;"
-                    mycursor.execute(sql)
 
-            if choice_today == "2":
+            elif choice_today == "2":
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
                 mycursor.execute(sql,(Customer_1.Cust_id,))
                 rows=mycursor.fetchall()
-                if data is not None:
-                    print("The balance amount is: Rs.",data[6], "/-")
+                if data_out is not None:
+                    print("|-------------------------------------------")
+                    print("|   The balance amount is: Rs.",data_out[6], "/-\t|")
+                    print("|-------------------------------------------")
 
-            if choice_today == "3":
+            elif choice_today == "3":
                 sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s;"
                 mycursor.execute(sql, (Customer_1.Cust_id, Customer_1.Cust_id))
                 rows = mycursor.fetchall()
                 if rows is None:
                     print("No trasactions found")
                 else:
-                    print("Transaction id\t\t\t Sender\t Receiver\t amount\t")
+                    print("|-------------------------------------------------------------------------------|")
+                    print("| Transaction id\t\t| Sender\t| Receiver\t| amount\t|")
+                    print("|-------------------------------------------------------------------------------|")
                     for row in rows:
-                        print(row[0],"\t",row[2],"\t\t",row[5])
+                        print("|", row[0],"\t|",row[1],"\t|",row[2],"\t|",row[5],"\t\t|")
+                    print("|-------------------------------------------------------------------------------|")
 
-            if choice_today=="5":
+            elif choice_today == "4":
+                sql = "SELECT * FROM customer WHERE cust_id = %s;"
+                mycursor.execute(sql,(Customer_1.Cust_id,))
+                rows=mycursor.fetchall()
+                if data_out is not None:
+                    loan_id = generate_loan_id(data_out[7], data_out[0])
+                    loan_amt = int(input("How much loan do you want to take : "))
+                    duration = int(input("For How long (in years): "))
+
+                    emi = (loan_amt*1.0) / (duration*12.0)
+                    today = datetime.date.today()
+                    deadline = today + datetime.timedelta(days=365 * duration)
+
+                    print("Here is you loan details : \n")
+                    print("Total loan is Rs. " , loan_amt, "/-")
+                    print("Your emi will be Rs. ", emi, " /-" )
+                    print("Time to repay the loan (in years) : ", duration)
+                    print("Last date to repay the loan : ", deadline)
+                    choice_loan = input("Do you want to take the loan? [Y/N] : ")
+                    if choice_loan == "Y":
+                        sql = "INSERT INTO loan VALUES (%s, %s, %s, %s, %s)"
+                        mycursor.execute(sql,(loan_id, data_out[0], loan_amt, emi, deadline))
+
+                        sql = "UPDATE customer SET balance = balance + %s WHERE cust_id = %s"
+                        mycursor.execute(sql, (loan_amt, data_out[0]))
+
+                        print("Loan taken successfully")
+                        mycursor.execute("COMMIT")
+
+            elif choice_today=="5":
                 pin = input("Enter the upi pin: ")
                 if pin == Customer_1.M_pin:
-                    print("\n\n----------------------------------------------------------------\n")
-                    print("         Customer id: ",Customer_1.Cust_id,"\n")
-                    print("         Name: ",Customer_1.Name,"\n")
-                    print("         Phone Number: ",Customer_1.Phone,"\n")
-                    print("         Email: ",Customer_1.Email,"\n")
-                    print("         Account Number: ",Customer_1.Account_num,"\n")
-                    print("         Balance: Rs.",Customer_1.Balance,"\n")
-                    print("----------------------------------------------------------------")
+                    print("\n\n|----------------------------------------------------------------|\n")
+                    print("|         Customer id: ",Customer_1.Cust_id,"\n")
+                    print("|         Name: ",Customer_1.Name,"\n")
+                    print("|         Phone Number: ",Customer_1.Phone,"\n")
+                    print("|         Email: ",Customer_1.Email,"\n")
+                    print("|         Account Number: ",Customer_1.Account_num,"\n")
+                    print("|         Balance: Rs.",Customer_1.Balance,"\n")
+                    print("|----------------------------------------------------------------|")
                 else:
                     print("Invalid UPI Pin!!!!")
 
-            if choice_today =="6":
+            elif choice_today =="6":
                 print("\n\nWhich of the following detail would you like to edit: \n")
                 print("             1.Name")
                 print("             2.Email")
                 print("             3.Phone Number")
                 print("             4.mpin")
                 edit_choice=input("Enter your choice: ")
-
-            if choice_today == '7':
+            elif choice_today == '7':
                 break
-
+            mycursor.execute("COMMIT")
     else:
         print("\nLogin failed. Please check your Customer id and UPI pin.")
 
