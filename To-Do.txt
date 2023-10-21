@@ -4,6 +4,7 @@ IN CUSTOMER.PY
 4 --> Code for taking loan
  -- Code for paying the loans
  -- Checking for defaulters while doing transactions
+ -- We can use LIKE option to search for people in the database and return their names along with their IDs for transactions. 
 
 IN ADMIN.PY
 
@@ -16,3 +17,6 @@ ERRORS
 
 While inserting new customer | Error : TypeError: not all arguments converted during string formatting | line 236
 Soon after taking loan, balance is not updated in the UI
+
+
+@HRIDAY If you get any idea or have any siggestions, add them here under suggestions/ideas and I will implement them. 
