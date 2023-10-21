@@ -207,7 +207,22 @@ if choice == "1":
     print("\n\nSign in Successful.. Thank you for choosing phonepe. What would you like to do today: ")
     print("\n\nSign in Successful. Here are your details.\n")
 
-    
+    print("Cust_ID : " , Customer_1.Cust_id)
+    print("Name : ", Customer_1.Name)
+    print("Phone :", Customer_1.Phone)
+    print("Email : ", Customer_1.Email)
+    print("MPIN : ",Customer_1.M_pin)
+    print("Account Number : ", Customer_1.Account_num)
+    print("Balance : ", Customer_1.Balance)
+
+    mycursor.execute("SELECT branch FROM bank WHERE branch_id = %s", Customer_1.Branch_id)
+    branch = mycursor.fetchall()[0]
+
+    mycursor.execute("SELECT bank_name FROM bank WHERE bank_id = %s", Customer_1.Bank_id)
+    bank = mycursor.fetchall()[0]
+
+    print("Bank : ", bank)
+    print("Branch : ", branch)
 ###########################################################################################################
     
 elif choice == "2":
