@@ -5,4 +5,4 @@
 5. Code for editing details
 6. Code for viewing balance
 7. Code for taking loan
-8. COde for checking transactions [UI]
+8. Code for checking transactions [UI]
