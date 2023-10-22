@@ -137,7 +137,7 @@ conn= psycopg2.connect(
     port=5432,
     database="phonepe",
     user="postgres",
-    password="123456"
+    password="1234"
 )
 
 mycursor = conn.cursor()
@@ -264,8 +264,8 @@ if choice == "1":
     # cust_id | name | phone | email | mpin | acc_no | balance | bank_id | branch_id
 
     sql = "INSERT INTO customer (cust_id, name, phone, email, mpin, acc_no, balance, bank_id, branch_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    mycursor.execute(sql, (l,))
-    
+    mycursor.execute(sql, tuple(l))
+
     print("\n\nSign in Successful. Here are your details.\n")
 
     print("Cust_ID : " , Customer_1.Cust_id)
@@ -276,10 +276,10 @@ if choice == "1":
     print("Account Number : ", Customer_1.Account_num)
     print("Balance : ", Customer_1.Balance)
 
-    mycursor.execute("SELECT DISTINCT branch FROM bank WHERE branch_id = %s", Customer_1.Branch_id)
+    mycursor.execute("SELECT DISTINCT branch FROM bank WHERE branch_id = %s", (Customer_1.Branch_id,))
     branch = mycursor.fetchall()[0]
 
-    mycursor.execute("SELECT bank_name FROM bank WHERE bank_id = %s", Customer_1.Bank_id)
+    mycursor.execute("SELECT bank_name FROM bank WHERE bank_id = %s", (Customer_1.Bank_id,))
     bank = mycursor.fetchall()[0]
 
     print("Bank : ", bank)
@@ -288,8 +288,7 @@ if choice == "1":
     print("\n\nThank you for choosing phonepe.")
 
     conn.commit()
-    conn.close()
-    mycursor.close()
+
 
 ###########################################################################################################
     
@@ -300,7 +299,7 @@ elif choice == "2":
     port=5432,
     database="phonepe",
     user="postgres",
-    password="123456"
+    password="1234"
     )
 
     mycursor = conn.cursor()
@@ -340,7 +339,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 mycursor = conn.cursor()
@@ -412,7 +411,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
@@ -430,7 +429,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 print("\t 1. Complete Transaction")
@@ -442,14 +441,14 @@ elif choice == "2":
 
                 if( trans_choice == "1" ):
 
-                    sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s ORDER BY dte, time DESC"
+                    sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s ORDER BY date, time DESC"
                     mycursor.execute(sql, (Customer_1.Cust_id, Customer_1.Cust_id))
                     rows = mycursor.fetchall()
                     if rows is None:
                         print("No trasactions found")
                     else:
                         print("|-----------------------------------------------------------------------------------------------------------------------|")
-                        print("| Transaction id\t\t| Sender\t| Receiver\t| Date\t\t| Time\t\t\t| amount\t|")
+                        print("| Transaction id\t\t| Sender\t| Reciever\t| Date\t\t| Time\t\t\t| amount\t|")
                         print("|-----------------------------------------------------------------------------------------------------------------------|")
 
                         for row in rows:
@@ -532,7 +531,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
@@ -570,7 +569,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 pin = input("Enter the UPI : ")
@@ -594,7 +593,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 print("\n\nWhich of the following detail would you like to edit: \n\n")
