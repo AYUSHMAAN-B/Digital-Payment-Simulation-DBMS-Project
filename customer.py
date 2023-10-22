@@ -509,8 +509,8 @@ elif choice == "2":
 
                 elif trans_choice == "4":
                     person = input("Enter person id : ")
-                    sql = "SELECT * FROM transactions WHERE sender_id = %s OR reciever_id = %s ORDER BY dte, time DESC"
-                    mycursor.execute(sql, (person, person))
+                    sql = "SELECT * FROM transactions WHERE sender_id = %s AND reciever_id = %s OR sender_id = %s AND reciever_id = %s ORDER BY dte, time DESC"
+                    mycursor.execute(sql, (person, Customer_1.Cust_id, Customer_1.Cust_id, person))
                     rows = mycursor.fetchall()
                     if rows is None:
                         print("No trasactions found")
@@ -588,15 +588,19 @@ elif choice == "2":
                 password="123456"
                 )
 
+                sql = "SELECT * FROM customer WHERE cust_id = %s"
+                mycursor.execute(sql, (Customer_1.Cust_id,))
+                row = mycursor.fetchone()
+
                 pin = input("Enter the UPI : ")
                 if pin == Customer_1.M_pin:
                     print("\n\n|----------------------------------------------------------------|\n")
                     print("|         Customer id: ",Customer_1.Cust_id,"\n")
                     print("|         Name: ",Customer_1.Name,"\n")
                     print("|         Phone Number: ",Customer_1.Phone,"\n")
-                    print("|         Email: ",Customer_1.Email,"\n")
+                    print("|         Email: ",row[3],"\n")
                     print("|         Account Number: ",Customer_1.Account_num,"\n")
-                    print("|         Balance: Rs.",Customer_1.Balance,"\n")
+                    print("|         Balance: Rs.",row[6],"\n")
                     print("|----------------------------------------------------------------|")
                 else:
                     print("\nInvalid UPI Pin!!!!")
