@@ -2,7 +2,6 @@ IN CUSTOMER.PY
 
 1 --> New Customer Inserting
 4 --> Code for taking loan
- -- Code for paying the loans
  -- Checking for defaulters while doing transactions
  -- We can use LIKE option to search for people in the database and return their names along with their IDs for transactions. 
 
