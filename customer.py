@@ -542,34 +542,41 @@ elif choice == "2":
                 user="postgres",
                 password="123456"
                 )
-
-                sql = "SELECT * FROM customer WHERE cust_id = %s;"
+                
+                sql = "SELECT cust_id FROM loan WHERE cust_id = %s"
                 mycursor.execute(sql,(Customer_1.Cust_id,))
-                rows=mycursor.fetchall()
-                if data_out is not None:
-                    loan_id = generate_loan_id(data_out[7], data_out[0])
-                    loan_amt = int(input("How much loan do you want to take : "))
-                    duration = int(input("For How long (in years): "))
+                row = mycursor.fetchone()
 
-                    emi = (loan_amt*1.0) / (duration*12.0)
-                    today = datetime.date.today()
-                    deadline = today + datetime.timedelta(days=365 * duration)
+                if row is None:
+                    sql = "SELECT * FROM customer WHERE cust_id = %s;"
+                    mycursor.execute(sql,(Customer_1.Cust_id,))
+                    rows=mycursor.fetchall()
+                    if data_out is not None:
+                        loan_id = generate_loan_id(data_out[7], data_out[0])
+                        loan_amt = int(input("How much loan do you want to take : "))
+                        duration = int(input("For How long (in years): "))
 
-                    print("Here is you loan details : \n")
-                    print("Total loan is Rs. " , loan_amt, "/-")
-                    print("Your emi will be Rs. ", emi, " /-" )
-                    print("Time to repay the loan (in years) : ", duration)
-                    print("Last date to repay the loan : ", deadline)
-                    choice_loan = input("Do you want to take the loan? [Y/N] : ")
-                    if choice_loan == "Y":
-                        sql = "INSERT INTO loan VALUES (%s, %s, %s, %s, %s, %s)"
-                        mycursor.execute(sql,(loan_id, data_out[0], loan_amt, emi, deadline, loan_amt))
+                        emi = (loan_amt*1.0) / (duration*12.0)
+                        today = datetime.date.today()
+                        deadline = today + datetime.timedelta(days=365 * duration)
 
-                        sql = "UPDATE customer SET balance = balance + %s WHERE cust_id = %s"
-                        mycursor.execute(sql, (loan_amt, data_out[0]))
+                        print("Here is you loan details : \n")
+                        print("Total loan is Rs. " , loan_amt, "/-")
+                        print("Your emi will be Rs. ", emi, " /-" )
+                        print("Time to repay the loan (in years) : ", duration)
+                        print("Last date to repay the loan : ", deadline)
+                        choice_loan = input("Do you want to take the loan? [Y/N] : ")
+                        if choice_loan == "Y":
+                            sql = "INSERT INTO loan VALUES (%s, %s, %s, %s, %s, %s)"
+                            mycursor.execute(sql,(loan_id, data_out[0], loan_amt, emi, deadline, loan_amt))
 
-                        print("Loan taken successfully")
-                        mycursor.execute("COMMIT")
+                            sql = "UPDATE customer SET balance = balance + %s WHERE cust_id = %s"
+                            mycursor.execute(sql, (loan_amt, data_out[0]))
+
+                            print("Loan taken successfully")
+                            mycursor.execute("COMMIT")
+                else:
+                    print("You already have a loan. Clear that loan to take another loan.")
 
             elif choice_today=="5":
 
