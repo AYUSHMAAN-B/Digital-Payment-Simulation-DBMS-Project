@@ -19,3 +19,8 @@ Soon after taking loan, balance is not updated in the UI
 
 
 @HRIDAY If you get any idea or have any siggestions, add them here under suggestions/ideas and I will implement them. 
+
+--> Complete the code for loan in customer.py
+--> Check in defaulters list before making a transaction
+--> Add a confirm password step in customer.py if possible
+--> Start with admin.py
