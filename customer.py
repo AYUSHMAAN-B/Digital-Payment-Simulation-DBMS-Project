@@ -91,20 +91,20 @@ def search():
     while not satisfied:
         search_string = input("Enter the string to search : ")
 
-        sql = "SELECT name FROM customer WHERE name LIKE %s"
+        sql = "SELECT DISTINCT name FROM customer WHERE name LIKE %s"
         mycursor.execute(sql, (search_string + "%", ))
         l = []
         rows = mycursor.fetchall()
         for row in rows:
             l.append(row[0])
 
-        sql = "SELECT name FROM customer WHERE name LIKE %s"
+        sql = "SELECT DISTINCT name FROM customer WHERE name LIKE %s"
         mycursor.execute(sql, ("%" + search_string + "%", ))
         rows = mycursor.fetchall()
         for row in rows:
             l.append(row[0])
 
-        sql = "SELECT name FROM customer WHERE name LIKE %s"
+        sql = "SELECT DISTINCT name FROM customer WHERE name LIKE %s"
         mycursor.execute(sql, ("%" + search_string, ))
         rows = mycursor.fetchall()
         for row in rows:
@@ -162,7 +162,13 @@ print("\n\n")
 ###########################################################################################################
 
 print("     1.New Customer: Sign Up                  2.Existing Customer: Login\n")
-choice =input("Please Enter your choice: ")
+
+while True:
+    choice =input("Please Enter your choice: ")
+    if choice == "1" or choice == "2":
+        break
+    else:
+        print("Enter valid choice")
 
 if choice == "1":
     print("\n\n             Please Fill the following Details:\n")
@@ -182,7 +188,7 @@ if choice == "1":
         M_pin = input("UPI Pin should be 6 digits. Please Enter Again: ")
 
     print("\n           BANKS LIST:")
-    sql = "SELECT bank_name FROM bank;"
+    sql = "SELECT DISTINCT bank_name FROM bank ORDER BY bank_name"
     mycursor.execute(sql)
     rows = mycursor.fetchall()
     count = 1
@@ -190,29 +196,22 @@ if choice == "1":
     l = []
 
     for row in rows:
-        row_str = '\t'.join(map(str, row))
-        l.append(row_str)
-
-    s = set(l)
-
-    for ss in s:
-        print(count, ". ", ss)
+        # row_str = '\t'.join(map(str, row))
+        # l.append(row_str)
+        print(count, ". ", row[0])
         count += 1
 
     ch = int(input("Enter in which bank is your account in: "))
 
-    sql = "SELECT bank_id FROM bank;"
+    sql = "SELECT DISTINCT bank_id FROM bank ORDER BY bank_id"
     mycursor.execute(sql)
     rows = mycursor.fetchall()
     count = 1
 
     for row in rows:
-        row_str = '\t'.join(map(str, row))
-
         if count == ch:
-            Bank_id = row_str
+            Bank_id = row[0]
             break
-
         count = count + 1
 
     print(Bank_id)
@@ -381,7 +380,18 @@ elif choice == "2":
 
                         if pin == data_from[4]:
                             print("Your current balance is : Rs. ", data_from[6], " /-")
-                            amount = int(input("Enter the amount you would like to transfer: "))
+
+                            while True:
+                                amount = int(input("Enter the amount you would like to transfer: "))
+                                if amount < 0:
+                                    print("You entered negative amount. Please enter again.")
+                                    continue
+                                elif amount == 0:
+                                    print("You entered 0. Please enter again.")
+                                    continue
+                                else:
+                                    break
+
                             balance_amount = data_from[6] - amount
 
                             if balance_amount > 0:
@@ -553,7 +563,18 @@ elif choice == "2":
                     rows=mycursor.fetchall()
                     if data_out is not None:
                         loan_id = generate_loan_id(data_out[7], data_out[0])
-                        loan_amt = int(input("How much loan do you want to take : "))
+
+                        while True:
+                                loan_amt = int(input("How much loan do you want to take : "))
+                                if loan_amt < 0:
+                                    print("You entered negative amount. Please enter again.")
+                                    continue
+                                elif loan_amt == 0:
+                                    print("You entered 0. Please enter again.")
+                                    continue
+                                else:
+                                    break
+                        
                         duration = int(input("For How long (in years): "))
 
                         emi = (loan_amt*1.0) / (duration*12.0)
@@ -622,6 +643,10 @@ elif choice == "2":
                 print("             3. Email")
                 print("             4. MPIN")
                 edit_choice=input("\nEnter your choice: ")
+
+                if edit_choice != "1" or "2" or "3" or "4":
+                    print("Wrong option")
+                    continue
 
                 if edit_choice == "1":
                     new = input("Enter your new name : ")

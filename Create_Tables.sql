@@ -22,10 +22,7 @@ CREATE TABLE CUSTOMER (
 			bank_id 	VARCHAR(255) NOT NULL ,
 			branch_id 	VARCHAR(100) NOT NULL,
 
-			FOREIGN KEY (bank_id, branch_id) REFERENCES BANK (bank_id, branch_id),
-
-			UNIQUE (phone)
-
+			FOREIGN KEY (bank_id, branch_id) REFERENCES BANK (bank_id, branch_id)
 );
 
 			
