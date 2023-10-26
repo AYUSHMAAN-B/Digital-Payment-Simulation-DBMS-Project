@@ -56,3 +56,12 @@ CREATE TABLE DEFAULTER (
 			penalty 	INT NOT NULL
 
 			);
+
+CREATE TABLE PAYMENTS (
+
+			cust_id		VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
+			dte			VARCHAR(100),
+			time		VARCHAR(100),
+			payment    	VARCHAR(100)
+
+			)

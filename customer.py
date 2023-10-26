@@ -196,8 +196,6 @@ if choice == "1":
     l = []
 
     for row in rows:
-        # row_str = '\t'.join(map(str, row))
-        # l.append(row_str)
         print(count, ". ", row[0])
         count += 1
 
@@ -326,8 +324,8 @@ elif choice == "2":
             print("         1. Make a Transaction                     2. Check Your Balance\n")
             print("         3. Check Your Transactions list           4. Take a loan\n")
             print("         5. Check your details                     6. Edit your details\n")
-            print("         7. Pay loan                               8. Exit")
-            # print("         7. Exit")
+            print("         7. Pay loan                               8. See loan payments\n")
+            print("         9. Exit")
             choice_today = input("Enter your choice: ")
 
             print("\n\n")
@@ -707,6 +705,12 @@ elif choice == "2":
                             print("Congratulations. You have cleared your debt.")
                             sql = "DELETE FROM loan WHERE cust_id = %s"
                             mycursor.execute( sql, (Customer_1.Cust_id,) )
+
+                        sql = "INSERT INTO payments VALUES (%s, %s, %s, %s)"
+                        current_date = datetime.date.today()
+                        current_time = datetime.datetime.now().time()
+                        mycursor.execute( sql, (Customer_1.Cust_id, current_date, current_time, payment) )
+
                     else:
                         print("You are paying more than what is owed. Not allowed")
                 else:
@@ -716,7 +720,27 @@ elif choice == "2":
 
                 mycursor.execute("COMMIT")
 
-            elif choice_today == '8':
+            elif choice_today == "8":
+                sql = "SELECT dte AS Date, time AS Time, payment AS Payment FROM payments WHERE cust_id = %s"
+                mycursor.execute( sql, (Customer_1.Cust_id,) )
+                rows = mycursor.fetchall()
+                
+                print("|----------------------------------------------|")
+
+                if rows is None:
+                    print("You don't have any loan payments")
+                else:
+                    
+                    print("| Date \t\t Time \t\t Amount Paid |")
+                    print()
+                    for row in rows:
+                        print("| ", row[0]," \t ", row[1]," \t ", row[2], " |")
+                    
+                    print()
+
+                print("|----------------------------------------------|")
+
+            elif choice_today == '9':
                 break
             mycursor.execute("COMMIT")
     else:
