@@ -1,0 +1,29 @@
+Merchant
+    View Bill_Payments
+
+Customer
+    View Bill
+
+Bill Payments by Customer
+    Electricity Bill
+    Phone Bill
+    Subscription
+
+New Tables:
+    Bill_Payments
+
+Bill_Payments:
+    payment_id
+    sender
+    reciever
+    date
+    time
+    amount
+    about
+
+
+
+UPGRADES
+
+Viewing Transactions with From date and To date
+Viewing Bills of Particular Bill

@@ -64,4 +64,43 @@ CREATE TABLE PAYMENTS (
 			time		VARCHAR(100),
 			payment    	VARCHAR(100)
 
-			)
+			);
+
+CREATE TABLE MERCHANT (
+
+			merch_id 	VARCHAR(100) NOT NULL PRIMARY KEY,
+			name 		VARCHAR(100) NOT NULL,
+			phone 		VARCHAR(100) NOT NULL,
+			email 		VARCHAR(100),
+			mpin 		VARCHAR(100) NOT NULL,
+			acc_no 		VARCHAR(100) NOT NULL,
+			balance 	INT CHECK(balance >= 0),
+			bank_id 	VARCHAR(255) NOT NULL ,
+			branch_id 	VARCHAR(100) NOT NULL,
+
+			FOREIGN KEY (bank_id, branch_id) REFERENCES BANK (bank_id, branch_id)
+
+			);
+
+CREATE TABLE MERCHANT_TRANSACTIONS (
+
+			merch_trans_id	VARCHAR(100) NOT NULL PRIMARY KEY,
+			sender_id		VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
+			reciever_id		VARCHAR(100) NOT NULL REFERENCES MERCHANT(merch_id),
+			dte				VARCHAR(100),
+			time			VARCHAR(100),
+			amount			INT NOT NULL
+			
+			);
+
+CREATE TABLE BILL_PAYMENTS (
+
+			merch_trans_id	VARCHAR(100) NOT NULL PRIMARY KEY,
+			sender_id		VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
+			reciever_id		VARCHAR(100) NOT NULL REFERENCES MERCHANT(merch_id),
+			dte				VARCHAR(100),
+			time			VARCHAR(100),
+			amount			INT NOT NULL,
+			about			VARCHAR(100)
+			
+			);
