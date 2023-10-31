@@ -133,12 +133,12 @@ def search():
 #########################################################################################################
 
 conn= psycopg2.connect(
-    host="localhost",
-    port=5432,
-    database="phonepe",
-    user="postgres",
-    password="123456"
-)
+   host="localhost",
+   port=5432,
+   database="phonepe",
+   user="postgres",
+   password="1234"
+   )
 
 mycursor = conn.cursor()
 
@@ -295,7 +295,7 @@ elif choice == "2":
     port=5432,
     database="phonepe",
     user="postgres",
-    password="123456"
+    password="1234"
     )
 
     mycursor = conn.cursor()
@@ -321,11 +321,11 @@ elif choice == "2":
 
             print("\n\n         What would you like to do today:\n")
             print("         1. Make a Transaction to a Friend                    2. Check Your Balance\n")
-            print("         3. Make a Transaction to a Merchant                  4. Pay a Bill\n")
-            print("         5. Check Your Transactions list           6. Take a loan\n")
-            print("         7. Check your details                     8. Edit your details\n")
-            print("         9. Pay loan                               10. See loan payments\n")
-            print("         11. Exit")
+            print("         3. Make a Transaction to a Merchant                  \n")
+            print("         4. Check Your Transactions list                      5. Take a loan\n")
+            print("         6. Check your details                                7. Edit your details\n")
+            print("         8. Pay loan                                          9. See loan payments\n")
+            print("         10. Exit")
             choice_today = input("Enter your choice: ")
 
             print("\n\n")
@@ -337,7 +337,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 mycursor = conn.cursor()
@@ -428,7 +428,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 sql = "SELECT * FROM customer WHERE cust_id = %s;"
@@ -446,7 +446,7 @@ elif choice == "2":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 mycursor = conn.cursor()
@@ -526,14 +526,14 @@ elif choice == "2":
                         print("Wrong UPI Pin!!!!!")
                         mycursor.execute("ROLLBACK")
         
-            elif choice_today == "5":
+            elif choice_today == "4":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 print("\t 1. Complete Transaction")
@@ -627,14 +627,14 @@ elif choice == "2":
 
                         print("|-----------------------------------------------------------------------------------------------------------------------|")
 
-            elif choice_today == "6":
+            elif choice_today == "5":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
                 
                 sql = "SELECT cust_id FROM loan WHERE cust_id = %s"
@@ -683,14 +683,14 @@ elif choice == "2":
                 else:
                     print("You already have a loan. Clear that loan to take another loan.")
 
-            elif choice_today=="7":
+            elif choice_today=="6":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 sql = "SELECT * FROM customer WHERE cust_id = %s"
@@ -711,14 +711,14 @@ elif choice == "2":
                     print("\nInvalid UPI Pin!!!!")
             
 
-            elif choice_today =="8":
+            elif choice_today =="7":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 print("\n\nWhich of the following detail would you like to edit: \n\n")
@@ -757,14 +757,14 @@ elif choice == "2":
 
                 print("Information updated successfully.")
 
-            elif choice_today == "9":
+            elif choice_today == "8":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 sql = "SELECT * FROM loan WHERE cust_id = %s"
@@ -779,32 +779,39 @@ elif choice == "2":
                     print("-------------------------------------------------------------")
 
                     payment = int(input("Enter how much you want to pay : "))
-                    new_due = int(row[5]) - payment
-                    if new_due >= 0:
-                        sql = "UPDATE customer SET balance = %s WHERE cust_id = %s"
-                        mycursor.execute( sql, ((Customer_1.Balance - payment), Customer_1.Cust_id) )
-                        sql = "UPDATE loan SET due = %s WHERE cust_id = %s"
-                        mycursor.execute( sql, (new_due, Customer_1.Cust_id) )
-                        if new_due != 0:
-                            print("Congratulations. Your new due is : ", new_due)
-                        else:
-                            print("Congratulations. You have cleared your debt.")
-                            sql = "DELETE FROM loan WHERE cust_id = %s"
-                            mycursor.execute( sql, (Customer_1.Cust_id,) )
-
-                        sql = "INSERT INTO payments VALUES (%s, %s, %s, %s)"
-                        current_date = datetime.date.today()
-                        current_time = datetime.datetime.now().time()
-                        mycursor.execute( sql, (Customer_1.Cust_id, current_date, current_time, payment) )
-
+                    sql = "SELECT balance FROM customer WHERE cust_id = %s"
+                    mycursor.execute(sql,(Customer_1.Cust_id,))
+                    result = mycursor.fetchone()
+                    new_balance = int(result[0])-payment
+                    if new_balance < 0:
+                        print("Insufficient Balance!!!. You cannot pay the loan")
                     else:
-                        print("You are paying more than what is owed. Not allowed")
+                        new_due = int(row[5]) - payment
+                        if new_due >= 0:
+                            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s"
+                            mycursor.execute( sql, (new_balance, Customer_1.Cust_id) )
+                            sql = "UPDATE loan SET due = %s WHERE cust_id = %s"
+                            mycursor.execute( sql, (new_due, Customer_1.Cust_id) )
+                            if new_due != 0:
+                                print("Congratulations. Your new due is : ", new_due)
+                            else:
+                                print("Congratulations. You have cleared your debt.")
+                                sql = "DELETE FROM loan WHERE cust_id = %s"
+                                mycursor.execute( sql, (Customer_1.Cust_id,) )
+
+                            sql = "INSERT INTO payments VALUES (%s, %s, %s, %s)"
+                            current_date = datetime.date.today()
+                            current_time = datetime.datetime.now().time()
+                            mycursor.execute( sql, (Customer_1.Cust_id, current_date, current_time, payment) )
+
+                        else:
+                            print("You are paying more than what is owed. Not allowed")
                 else:
                     print("You don't have any loan.")
 
                 mycursor.execute("COMMIT")
 
-            elif choice_today == "10":
+            elif choice_today == "9":
                 sql = "SELECT dte AS Date, time AS Time, payment AS Payment FROM payments WHERE cust_id = %s"
                 mycursor.execute( sql, (Customer_1.Cust_id,) )
                 rows = mycursor.fetchall()
@@ -824,7 +831,7 @@ elif choice == "2":
 
                 print("|----------------------------------------------|")
 
-            elif choice_today == '11':
+            elif choice_today == '10':
                 break
             mycursor.execute("COMMIT")
     else:
@@ -840,7 +847,7 @@ elif choice == "3":
 
     Email = input("Enter Your Email id [If you don't have one, enter NA]: ")
     if( Email != "NA" ):
-        while(email_validate(Email)==False):
+        while not email_validate(Email):
             Email = input("Invalid Email entered. Email should end with '@gmail.com'.\nPlease Enter Again: ")
 
     M_pin = input("Enter a 6-digit UPI pin: ")
@@ -952,7 +959,7 @@ elif choice == "4":
     port=5432,
     database="phonepe",
     user="postgres",
-    password="123456"
+    password="1234"
     )
 
     mycursor = conn.cursor()
@@ -1018,7 +1025,7 @@ elif choice == "4":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 sql = "SELECT * FROM merchant WHERE merch_id = %s"
@@ -1045,7 +1052,7 @@ elif choice == "4":
                 port=5432,
                 database="phonepe",
                 user="postgres",
-                password="123456"
+                password="1234"
                 )
 
                 print("\n\nWhich of the following detail would you like to edit: \n\n")
