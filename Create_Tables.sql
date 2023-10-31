@@ -18,7 +18,7 @@ CREATE TABLE CUSTOMER (
 			email 		VARCHAR(100),
 			mpin 		VARCHAR(100) NOT NULL,
 			acc_no 		VARCHAR(100) NOT NULL,
-			balance 	INT CHECK(balance >= 0),
+			balance 	INT NOT NULL,
 			bank_id 	VARCHAR(255) NOT NULL ,
 			branch_id 	VARCHAR(100) NOT NULL,
 
@@ -44,7 +44,7 @@ CREATE TABLE LOAN (
 			amount		INT  NOT NULL,
 			emi			INT NOT NULL,
 			deadline	timestamp,
-
+			due   		INT,
 			UNIQUE (loan_id)
 
 			);
