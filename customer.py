@@ -127,7 +127,11 @@ def search():
             sql = "SELECT cust_id FROM customer WHERE name = %s"
             mycursor.execute(sql, (found, ))
             name = mycursor.fetchone()
-            print("**********Name = ", name)
+
+            if name is None:
+                print("No customer with that name. Please enter as shown.")
+                return "EXIT"
+    
             return name[0]
 
 #########################################################################################################
@@ -136,7 +140,7 @@ conn= psycopg2.connect(
    host="localhost",
    port=5432,
    database="phonepe",
-   user="postgres",
+   user="ayushmaan",
    password="1234"
    )
 
@@ -294,7 +298,7 @@ elif choice == "2":
     host="localhost",
     port=5432,
     database="phonepe",
-    user="postgres",
+    user="ayushmaan",
     password="1234"
     )
 
@@ -320,12 +324,12 @@ elif choice == "2":
                 count += 1
 
             print("\n\n         What would you like to do today:\n")
-            print("         1. Make a Transaction to a Friend                    2. Check Your Balance\n")
-            print("         3. Make a Transaction to a Merchant                  \n")
-            print("         4. Check Your Transactions list                      5. Take a loan\n")
-            print("         6. Check your details                                7. Edit your details\n")
-            print("         8. Pay loan                                          9. See loan payments\n")
-            print("         10. Exit")
+            print("         1. Make a Transaction to a Friend                    2. Check Your Transactions list\n")
+            print("         3. Make a Transaction to a Merchant                  4. Check Your Merchant Transactions\n")
+            print("         5. Check Your Balance                                6. Take a loan\n")
+            print("         7. Check your details                                8. Edit your details\n")
+            print("         9. Pay loan                                          10. See loan payments\n")
+            print("         11. Exit")
             choice_today = input("Enter your choice: ")
 
             print("\n\n")
@@ -336,7 +340,7 @@ elif choice == "2":
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
+                user="ayushmaan",
                 password="1234"
                 )
 
@@ -427,112 +431,7 @@ elif choice == "2":
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
-                password="1234"
-                )
-
-                sql = "SELECT * FROM customer WHERE cust_id = %s;"
-                mycursor.execute(sql,(Customer_1.Cust_id,))
-                rows=mycursor.fetchone()
-
-                print("|-------------------------------------------")
-                print("|   The balance amount is: Rs.",rows[6], "/-\t|")
-                print("|-------------------------------------------")
-
-            elif choice_today == "3":
-                
-                conn= psycopg2.connect(
-                host="localhost",
-                port=5432,
-                database="phonepe",
-                user="postgres",
-                password="1234"
-                )
-
-                mycursor = conn.cursor()
-
-                mycursor.execute("BEGIN")
-
-                sql = "SELECT * FROM customer WHERE cust_id = %s AND mpin = %s;"
-                mycursor.execute(sql, (Cust_id, UPI_Pin))
-                data_from = mycursor.fetchone()
-
-                sql = "SELECT cust_id FROM defaulter WHERE cust_id = %s"
-                mycursor.execute( sql, (Customer_1.Cust_id,) )
-                defaulter = mycursor.fetchone()
-
-                if defaulter is not None:
-                    print("You are a defaulter. You didn't pay the existing loan. Please clear the loan to make a transaction.")
-                    continue
-
-                phone_number = input("Enter the merchant phone number to which you would like to transfer money : ")
-
-                sql = "SELECT * FROM merchant WHERE phone = %s;"
-                mycursor.execute(sql,(phone_number,))
-                data_to = mycursor.fetchone()
-
-                if data_to is None:
-                    print("The merchant is not available!!!!")
-                    mycursor.execute("ROLLBACK")
-                else:
-                    pin = input("Enter your UPI pin: ")
-
-                    if pin == data_from[4]:
-                        print("Your current balance is : Rs. ", data_from[6], " /-")
-
-                        while True:
-                            amount = int(input("Enter the amount you would like to transfer: "))
-                            if amount < 0:
-                                print("You entered negative amount. Please enter again.")
-                                continue
-                            elif amount == 0:
-                                print("You entered 0. Please enter again.")
-                                continue
-                            else:
-                                break
-
-                        balance_amount = data_from[6] - amount
-
-                        if balance_amount > 0:
-                            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
-                            values = (balance_amount, data_from[0])
-                            mycursor.execute(sql, values)
-
-                            sql = "SELECT merch_id FROM merchant WHERE phone = %s"
-                            mycursor.execute(  sql, (phone_number,))
-                            phone_rows = mycursor.fetchone()
-
-                            transfer_amount = int(data_to[6]) + amount
-                            sql = "UPDATE merchant SET balance = %s WHERE merch_id = %s;"
-                            values = (transfer_amount, phone_rows[0])
-                            mycursor.execute(sql, values)
-
-                            t_id=transaction_id_generator(data_from[0], phone_rows[0])
-                            current_date = datetime.date.today()
-                            current_time = datetime.datetime.now().time()
-
-                            sql = "INSERT INTO merchant_transactions VALUES (%s,%s,%s,%s,%s,%s);"
-                            values=(t_id, data_from[0], phone_rows[0], current_date, current_time, amount)
-                            mycursor.execute(sql,values)
-
-                            mycursor.execute("COMMIT")
-
-                            print("The money has been sent successfully.")
-                        else:
-                            print("Insufficient balance.!!!!")
-                            
-                            mycursor.execute("ROLLBACK")
-                    else:
-                        print("Wrong UPI Pin!!!!!")
-                        mycursor.execute("ROLLBACK")
-        
-            elif choice_today == "4":
-
-                conn= psycopg2.connect(
-                host="localhost",
-                port=5432,
-                database="phonepe",
-                user="postgres",
+                user="ayushmaan",
                 password="1234"
                 )
 
@@ -627,13 +526,139 @@ elif choice == "2":
 
                         print("|-----------------------------------------------------------------------------------------------------------------------|")
 
+
+            elif choice_today == "3":
+                
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="ayushmaan",
+                password="1234"
+                )
+
+                mycursor = conn.cursor()
+
+                mycursor.execute("BEGIN")
+
+                sql = "SELECT * FROM customer WHERE cust_id = %s AND mpin = %s;"
+                mycursor.execute(sql, (Cust_id, UPI_Pin))
+                data_from = mycursor.fetchone()
+
+                sql = "SELECT cust_id FROM defaulter WHERE cust_id = %s"
+                mycursor.execute( sql, (Customer_1.Cust_id,) )
+                defaulter = mycursor.fetchone()
+
+                if defaulter is not None:
+                    print("You are a defaulter. You didn't pay the existing loan. Please clear the loan to make a transaction.")
+                    continue
+
+                phone_number = input("Enter the merchant phone number to which you would like to transfer money : ")
+
+                sql = "SELECT * FROM merchant WHERE phone = %s;"
+                mycursor.execute(sql,(phone_number,))
+                data_to = mycursor.fetchone()
+
+                if data_to is None:
+                    print("The merchant is not available!!!!")
+                    mycursor.execute("ROLLBACK")
+                else:
+                    pin = input("Enter your UPI pin: ")
+
+                    if pin == data_from[4]:
+                        print("Your current balance is : Rs. ", data_from[6], " /-")
+
+                        while True:
+                            amount = int(input("Enter the amount you would like to transfer: "))
+                            if amount < 0:
+                                print("You entered negative amount. Please enter again.")
+                                continue
+                            elif amount == 0:
+                                print("You entered 0. Please enter again.")
+                                continue
+                            else:
+                                break
+
+                        balance_amount = data_from[6] - amount
+
+                        if balance_amount > 0:
+                            sql = "UPDATE customer SET balance = %s WHERE cust_id = %s;"
+                            values = (balance_amount, data_from[0])
+                            mycursor.execute(sql, values)
+
+                            sql = "SELECT merch_id FROM merchant WHERE phone = %s"
+                            mycursor.execute(  sql, (phone_number,))
+                            phone_rows = mycursor.fetchone()
+
+                            transfer_amount = int(data_to[6]) + amount
+                            sql = "UPDATE merchant SET balance = %s WHERE merch_id = %s;"
+                            values = (transfer_amount, phone_rows[0])
+                            mycursor.execute(sql, values)
+
+                            t_id=transaction_id_generator(data_from[0], phone_rows[0])
+                            current_date = datetime.date.today()
+                            current_time = datetime.datetime.now().time()
+
+                            sql = "INSERT INTO merchant_transactions VALUES (%s,%s,%s,%s,%s,%s);"
+                            values=(t_id, data_from[0], phone_rows[0], current_date, current_time, amount)
+                            mycursor.execute(sql,values)
+
+                            mycursor.execute("COMMIT")
+
+                            print("The money has been sent successfully.")
+                        else:
+                            print("Insufficient balance.!!!!")
+                            
+                            mycursor.execute("ROLLBACK")
+                    else:
+                        print("Wrong UPI Pin!!!!!")
+                        mycursor.execute("ROLLBACK")
+
+            elif choice_today == "4":
+
+                sql = "SELECT * FROM merchant_transactions WHERE sender_id = %s"
+                mycursor.execute( sql, (Customer_1.Cust_id, ) )
+                rows = mycursor.fetchall()
+
+                print("|-------------------------------------------------------------------------------------------------------------------| ")
+
+                print("  Transaction_ID\t\t Merchant_Name \t Merchant_Phone \t Date \t\t Time \t\t\t Amount ")
+
+                for row in rows:
+                    sql = " SELECT * from merchant WHERE merch_id = %s "
+                    mycursor.execute( sql, (row[2], ) )
+                    merchant = mycursor.fetchone()
+
+                    print(" ", row[0], "\t", merchant[1], "\t", merchant[2], "\t", row[3], "\t", row[4], "\t", row[5])
+
+                print("|-------------------------------------------------------------------------------------------------------------------| ")
+
+
             elif choice_today == "5":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
+                user="ayushmaan",
+                password="1234"
+                )
+
+                sql = "SELECT * FROM customer WHERE cust_id = %s;"
+                mycursor.execute(sql,(Customer_1.Cust_id,))
+                rows=mycursor.fetchone()
+
+                print("|-------------------------------------------")
+                print("|   The balance amount is: Rs.",rows[6], "/-\t|")
+                print("|-------------------------------------------")
+        
+            elif choice_today == "6":
+
+                conn= psycopg2.connect(
+                host="localhost",
+                port=5432,
+                database="phonepe",
+                user="ayushmaan",
                 password="1234"
                 )
                 
@@ -683,13 +708,13 @@ elif choice == "2":
                 else:
                     print("You already have a loan. Clear that loan to take another loan.")
 
-            elif choice_today=="6":
+            elif choice_today=="7":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
+                user="ayushmaan",
                 password="1234"
                 )
 
@@ -711,13 +736,13 @@ elif choice == "2":
                     print("\nInvalid UPI Pin!!!!")
             
 
-            elif choice_today =="7":
+            elif choice_today =="8":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
+                user="ayushmaan",
                 password="1234"
                 )
 
@@ -757,13 +782,13 @@ elif choice == "2":
 
                 print("Information updated successfully.")
 
-            elif choice_today == "8":
+            elif choice_today == "9":
 
                 conn= psycopg2.connect(
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
+                user="ayushmaan",
                 password="1234"
                 )
 
@@ -811,7 +836,7 @@ elif choice == "2":
 
                 mycursor.execute("COMMIT")
 
-            elif choice_today == "9":
+            elif choice_today == "10":
                 sql = "SELECT dte AS Date, time AS Time, payment AS Payment FROM payments WHERE cust_id = %s"
                 mycursor.execute( sql, (Customer_1.Cust_id,) )
                 rows = mycursor.fetchall()
@@ -831,7 +856,7 @@ elif choice == "2":
 
                 print("|----------------------------------------------|")
 
-            elif choice_today == '10':
+            elif choice_today == '11':
                 break
             mycursor.execute("COMMIT")
     else:
@@ -958,7 +983,7 @@ elif choice == "4":
     host="localhost",
     port=5432,
     database="phonepe",
-    user="postgres",
+    user="ayushmaan",
     password="1234"
     )
 
@@ -1024,7 +1049,7 @@ elif choice == "4":
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
+                user="ayushmaan",
                 password="1234"
                 )
 
@@ -1051,7 +1076,7 @@ elif choice == "4":
                 host="localhost",
                 port=5432,
                 database="phonepe",
-                user="postgres",
+                user="ayushmaan",
                 password="1234"
                 )
 

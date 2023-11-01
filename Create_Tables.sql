@@ -92,15 +92,3 @@ CREATE TABLE MERCHANT_TRANSACTIONS (
 			amount			INT NOT NULL
 			
 			);
-
-CREATE TABLE BILL_PAYMENTS (
-
-			merch_trans_id	VARCHAR(100) NOT NULL PRIMARY KEY,
-			sender_id		VARCHAR(100) NOT NULL REFERENCES CUSTOMER(cust_id),
-			reciever_id		VARCHAR(100) NOT NULL REFERENCES MERCHANT(merch_id),
-			dte				VARCHAR(100),
-			time			VARCHAR(100),
-			amount			INT NOT NULL,
-			about			VARCHAR(100)
-			
-			);
